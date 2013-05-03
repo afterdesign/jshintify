@@ -1,0 +1,6 @@
+[
+  {
+    "caption": "jshintify: Run jshint",
+    "command": "jshintify"
+  }
+]

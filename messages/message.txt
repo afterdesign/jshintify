@@ -1,0 +1,1 @@
+Before saying "it's not working" go to http://github.com/afterdesign/jshintify and read README !
