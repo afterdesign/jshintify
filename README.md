@@ -1,4 +1,4 @@
-# jshint plugin for sublime
+# yet another jshint plugin for sublime
 
 ## How to install (mac os version) ?
 
