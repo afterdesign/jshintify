@@ -1,26 +1,20 @@
 {
-    "run" : {
-        "on_load" : true,
-        "on_save" : true
-    },
+    "run_on_load" : true,
+    "run_on_save" : true,
+
+    "error_messages_show_count" : true,
+    "error_messages_show_first" : true,
+
     "extensions" : [".js"],
-    "jshintrc" : "",
-    "show" : {
-        "dot" : true,
-        "outline" : true
-    },
+    "jshintrc" : "/Users/afterdesign/Projects/redsky-linters/JavaScript/jshintrc",
+
+    "show_dot" : true,
+    "show_outline" : true,
+
     "paths" : {
         "osx" : {
             "jshint_path" : "/usr/local/share/npm/bin/jshint",
             "node_path" : "/usr/local/bin/node"
-        },
-        "windows" : {
-            "jshint_path" : "",
-            "node_path" : ""
-        },
-        "linux" : {
-            "jshint_path" : "",
-            "node_path" : ""
         }
     }
 }

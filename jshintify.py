@@ -11,6 +11,19 @@ import json
 from hashlib import sha1
 
 SETTINGS = sublime.load_settings('Jshintify.sublime-settings')
+
+RUN_ON_LOAD = SETTINGS.get('run_on_load', False)
+RUN_ON_SAVE = SETTINGS.get('run_on_save', False)
+
+ERRORS_SHOW_COUNT = SETTINGS.get('error_messages_show_count', False)
+ERRORS_SHOW_FIRST = SETTINGS.get('error_messages_show_first', False)
+
+EXTENSIONS = SETTINGS.get('extensions', [])
+
+SHOW_DOT = SETTINGS.get('show_dot', False)
+SHOW_OUTLINE = SETTINGS.get('show_outline', False)
+
+# for now let's cache those errors
 ERRORS = {}
 
 class Jshintify(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
@@ -35,65 +48,81 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
         """
         Event triggered after file save
         """
-
-        run_jshint(view, ERRORS, SETTINGS)
+        if RUN_ON_SAVE:
+            run_jshint(view, ERRORS, SETTINGS)
 
     def on_load(self, view):#pylint: disable-msg=R0201
         """
         Event triggered after file open
         """
-
-        run_jshint(view, ERRORS, SETTINGS)
+        if RUN_ON_LOAD:
+            run_jshint(view, ERRORS, SETTINGS)
 
     def on_selection_modified(self, view):#pylint: disable-msg=R0201
         """
         Event triggered during moving in editor
         """
-        (js_file_name, js_file_name_hash) = get_file_information(view)
-        
         try:
-            check_file_extension(js_file_name, SETTINGS)
+            js_file_name_hash = check_file(view)[1]
         except Error:
             return
 
         row = view.rowcol(view.sel()[0].begin())[0]
-        
-        if str(row + 1) in ERRORS[js_file_name_hash]:
-            this_error = ERRORS[js_file_name_hash][str(row + 1)]
-            string = "{id} : {reason}".format(
-                id = this_error['id'],
-                reason = this_error['reason']
-                )
+
+        if js_file_name_hash in ERRORS and str(row + 1) in ERRORS[js_file_name_hash]:
+            this_error = ERRORS[js_file_name_hash][str(row + 1)][0]
+
+            string = ''
+            if ERRORS_SHOW_COUNT:
+                string += "ERRORS : {count} | ".format(count = len(ERRORS[js_file_name_hash][str(row + 1)]))
+
+            if ERRORS_SHOW_FIRST:
+                string += get_error_string(this_error)
 
             view.set_status("JSHint", string)
 
         elif view.get_status("JSHint"):
             view.erase_status("JSHint")
 
+class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
+    """Command to clear the sniffer marks from the view"""
+    description = 'Clear sniffer marks...'
 
-def get_file_information(view):
+    def run(self, edit):#pylint: disable-msg=R0903,W0232,W0613
+        """
+        Run plugin
+        """
+        row = self.view.rowcol(self.view.sel()[0].begin())[0]
+
+        try:
+            js_file_name_hash = check_file(self.view)[1]
+        except Error:
+            return
+
+        if js_file_name_hash in ERRORS and str(row + 1) in ERRORS[js_file_name_hash]:
+            error_data = []
+            for error in ERRORS[js_file_name_hash][str(row + 1)]:
+                error_data.append(get_error_string(error))
+
+            self.view.window().show_quick_panel(error_data, None, sublime.MONOSPACE_FONT)
+
+def check_file(view):
     """
     Get current filename
     """
 
     if view.file_name() is not None:
-        return (view.file_name(), sha1(view.file_name()).hexdigest())
+        js_file_name = view.file_name()
     elif view.window() is not None and view.window().active_view().file_name() is not None:
-        return (view.window().active_view().file_name(), sha1(view.window().active_view().file_name()).hexdigest())
+        js_file_name = view.window().active_view().file_name()
     else:
         raise Error("This may be a bug, please create issue on github")
 
-def check_file_extension(js_file_name, settings):
-    """
-    Check if file should be linted or not.
-    """
-
-    file_extensions = settings.get("extensions") or []
-
-    if os.path.splitext(js_file_name)[1] not in file_extensions:
+    if os.path.splitext(js_file_name)[1] not in EXTENSIONS:
         raise Error("File not on list")
 
-    return True
+    return (js_file_name, sha1(js_file_name).hexdigest())
+
 
 def create_command(settings, js_file_name):
     """
@@ -104,7 +133,9 @@ def create_command(settings, js_file_name):
     platform = sublime.platform()
     if platform not in settings.get('paths') or len(settings.get('paths')[platform]['node_path']) == 0 or \
         len(settings.get('paths')[platform]['jshint_path']) == 0:
-        print "SET PATHS FOR NODE AND JSHINT FOR YOUR PLATFORM"
+        print("SET PATHS FOR NODE AND JSHINT FOR YOUR PLATFORM")
+
+        return False
 
     command.append(settings.get('paths')[platform]['node_path'])
     command.append(settings.get("paths")[platform]['jshint_path'])
@@ -128,10 +159,8 @@ def run_jshint(view, errors, settings):
     Run jshint
     """
     
-    (js_file_name, js_file_name_hash) = get_file_information(view)
-
     try:
-        check_file_extension(js_file_name, settings)
+        (js_file_name, js_file_name_hash) = check_file(view)
     except Error:
         return
 
@@ -139,6 +168,9 @@ def run_jshint(view, errors, settings):
         errors[js_file_name_hash] = {}
 
     command = create_command(settings, js_file_name)
+    if command == False:
+        return
+
     proc = subprocess.Popen(command,
                         stdout=subprocess.PIPE,
                         stderr=subprocess.PIPE)
@@ -151,34 +183,40 @@ def run_jshint(view, errors, settings):
 
     for line in errors[js_file_name_hash]:
         if line not in new_errors:
-            draw_line(view, line, sublime.DRAW_EMPTY_AS_OVERWRITE, settings)
-            view.erase_regions('jshintify.error.' + line)
+            draw_line(view, line, sublime.DRAW_EMPTY_AS_OVERWRITE)
+            view.erase_regions('jshintify.error')
         else:
             del new_errors[line]
 
     for line in new_errors:
-        draw_line(view, line, sublime.DRAW_OUTLINED, settings)
+        draw_line(view, line, sublime.DRAW_OUTLINED)
     
     if len(new_errors) == 0:
         errors[js_file_name_hash] = {}
     else:
         errors[js_file_name_hash].update(new_errors)
 
-def draw_line(view, line_number, draw_type, settings):
+def draw_line(view, line_number, draw_type):
     """
     Draw outline/"dot".
     """
     dot_sign = ''
-    if settings.get('show')['dot'] and draw_type != sublime.DRAW_EMPTY_AS_OVERWRITE:
+    if SHOW_DOT and draw_type != sublime.DRAW_EMPTY_AS_OVERWRITE:
         dot_sign = 'dot'
 
-    if not settings.get('show')['outline']:
+    if not SHOW_OUTLINE:
         draw_type = sublime.DRAW_EMPTY_AS_OVERWRITE
-
 
     line = view.line(view.text_point(int(line_number) - 1, 0))
     view.add_regions('jshintify.error.' + line_number, [line],
-                    'jshintify.error.' + line_number, dot_sign, draw_type)
+                    'jshintify.error', dot_sign, draw_type)
+
+def get_error_string(error):
+    """
+    Return Error string
+    """
+
+    return "{id} : {reason}".format(id = error['id'], reason = error['reason'])
 
 class Error(Exception):
     """

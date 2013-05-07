@@ -13,22 +13,43 @@
     ```
 5. open preferences and check if the paths for node and jshint are correct
 6. set the path to your jshint file
-6. use ```ctrl+super+j``` to run
+7. use ```ctrl+super+j``` to run
+8. use ``` ctrl+shift+j``` to show list of errors in current line
 
 ## Default settings:
 
+1. ```run_on_load``` - run jshint right after file is loaded do editor
+2. ```run_on_save``` - run jshint after file is saved
+3. ```error_messages_show_count``` and ```error_messages_show_first```
+	without ```error_messages_show_count``` show message like:
+
+	```
+	(error) : Expected 'for' to have an indentation at 13 instead at 9.
+	```
+	
+	with ```error_messages_show_count``` show message like:
+	
+	```
+	ERRORS : 1 | (error) : Expected 'for' to have an indentation at 13 instead at 9.
+	```
+4. ```show_dot``` - show dot on panel with line number
+5. ```show_outline``` - draw outline on line with error
+
+
 ```
 {
-    "run" : {
-        "on_load" : true,
-        "on_save" : true
-    },
+    "run_on_load" : false,
+    "run_on_save" : true,
+
+    "error_messages_show_count" : true,
+    "error_messages_show_first" : true,
+
     "extensions" : [".js"],
-    "jshintrc" : "",
-    "show" : {
-        "dot" : true,
-        "outline" : true
-    },
+    "jshintrc" : "/Users/afterdesign/Projects/redsky-linters/JavaScript/jshintrc",
+
+    "show_dot" : true,
+    "show_outline" : true,
+
     "paths" : {
         "osx" : {
             "jshint_path" : "/usr/local/share/npm/bin/jshint",
