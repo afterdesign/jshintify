@@ -110,7 +110,7 @@ def check_file(view):
     """
     Get current filename
     """
-
+    js_file_name = ""
     if view.file_name() is not None:
         js_file_name = view.file_name()
     elif view.window() is not None and view.window().active_view().file_name() is not None:
@@ -121,7 +121,7 @@ def check_file(view):
     if os.path.splitext(js_file_name)[1] not in EXTENSIONS:
         raise Error("File not on list")
 
-    return (js_file_name, sha1(js_file_name).hexdigest())
+    return (js_file_name, sha1(js_file_name.encode('utf-8')).hexdigest())
 
 
 def create_command(settings, js_file_name):
@@ -179,7 +179,7 @@ def run_jshint(view, errors, settings):
     if type(err) == bytes and len(err) > 0:
         raise Error(err)
 
-    new_errors = json.loads(out)
+    new_errors = json.loads(out.decode())
 
     for line in errors[js_file_name_hash]:
         if line not in new_errors:
