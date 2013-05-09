@@ -183,33 +183,38 @@ def run_jshint(view, errors, settings):
 
     for line in errors[js_file_name_hash]:
         if line not in new_errors:
-            draw_line(view, line, sublime.DRAW_EMPTY_AS_OVERWRITE)
-            view.erase_regions('jshintify.error')
+            view.erase_regions('jshintify.error.' + str(line))
+            
         else:
             del new_errors[line]
 
     for line in new_errors:
-        draw_line(view, line, sublime.DRAW_OUTLINED)
+        draw_line(view, line)
     
     if len(new_errors) == 0:
         errors[js_file_name_hash] = {}
     else:
         errors[js_file_name_hash].update(new_errors)
 
-def draw_line(view, line_number, draw_type):
+def draw_line(view, line_number):
     """
     Draw outline/"dot".
     """
+    
+    draw_type = sublime.DRAW_OUTLINED
     dot_sign = ''
-    if SHOW_DOT and draw_type != sublime.DRAW_EMPTY_AS_OVERWRITE:
+
+    if SHOW_DOT:
         dot_sign = 'dot'
 
     if not SHOW_OUTLINE:
-        draw_type = sublime.DRAW_EMPTY_AS_OVERWRITE
+        draw_type = sublime.HIDDEN
 
     line = view.line(view.text_point(int(line_number) - 1, 0))
-    view.add_regions('jshintify.error.' + line_number, [line],
-                    'jshintify.error', dot_sign, draw_type)
+    
+    if len(view.get_regions('jshintify.error.' + str(line_number))) == 0:
+        view.add_regions('jshintify.error.' + str(line_number), [line],
+                        'jshintify.error.' + str(line_number), dot_sign, draw_type)
 
 def get_error_string(error):
     """
