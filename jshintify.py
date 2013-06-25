@@ -4,11 +4,17 @@ Sublime text plugin that opens terminal.
 '''
 
 import sublime_plugin
+import threading
 import os
 import sublime
 import subprocess
 import json
-from hashlib import sha1
+
+if os.name == "nt":
+    STARTUPINFO = subprocess.STARTUPINFO()
+    STARTUPINFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+else:
+    STARTUPINFO = None
 
 SETTINGS = sublime.load_settings('Jshintify.sublime-settings')
 
@@ -37,7 +43,9 @@ class Jshintify(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
 
         @param edit: sublime.Edit
         '''
-        run_jshint(self.view, ERRORS, SETTINGS)
+        thread = JshintifyThread(self.view, ERRORS, SETTINGS)
+        thread.start()
+        progress_tracker(thread)
 
 class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=R0903,W0232,W0613
     """
@@ -49,32 +57,30 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
         Event triggered after file save
         """
         if RUN_ON_SAVE:
-            run_jshint(view, ERRORS, SETTINGS)
+            thread = JshintifyThread(view, ERRORS, SETTINGS)
+            thread.start()
+            progress_tracker(thread)
 
     def on_load(self, view):#pylint: disable-msg=R0201
         """
         Event triggered after file open
         """
         if RUN_ON_LOAD:
-            run_jshint(view, ERRORS, SETTINGS)
+            thread = JshintifyThread(view, ERRORS, SETTINGS)
+            thread.start()
+            progress_tracker(thread)
 
     def on_selection_modified(self, view):#pylint: disable-msg=R0201
-        """
-        Event triggered during moving in editor
-        """
-        try:
-            js_file_name_hash = check_file(view)[1]
-        except Error:
-            return
+        """ Event triggered during moving in editor """
 
         row = view.rowcol(view.sel()[0].begin())[0]
 
-        if js_file_name_hash in ERRORS and str(row + 1) in ERRORS[js_file_name_hash]:
-            this_error = ERRORS[js_file_name_hash][str(row + 1)][0]
+        if str(row + 1) in ERRORS:
+            this_error = ERRORS[str(row + 1)][0]
 
             string = ''
             if ERRORS_SHOW_COUNT:
-                string += "ERRORS : {count} | ".format(count = len(ERRORS[js_file_name_hash][str(row + 1)]))
+                string += "ERRORS : {count} | ".format(count = len(ERRORS[str(row + 1)]))
 
             if ERRORS_SHOW_FIRST:
                 string += get_error_string(this_error)
@@ -83,6 +89,117 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
 
         elif view.get_status("JSHint"):
             view.erase_status("JSHint")
+
+class JshintifyThread(threading.Thread):
+    """ docstring for JshintifyThread """
+
+    def __init__(self, view, errors, settings):
+        super(JshintifyThread, self).__init__()
+
+        self.view = view
+        self.errors = errors
+        self.settings = settings
+        
+        self.js_file_name = check_file(view) or None
+
+        platform = sublime.platform()
+
+        self.node_path = self.settings.get('paths')[platform]['node_path'] or 'node'
+        self.jshint_path = self.settings.get("paths")[platform]['jshint_path'] or 'jshint'
+
+        self.jshintrc = self.settings.get("jshintrc") or None
+
+        for line in self.errors:
+            self.view.erase_regions('jshintify.error.' + str(line))
+
+    def run(self):
+        """
+        Run jshint
+        """
+        print self.js_file_name, self.node_path, self.jshint_path
+        if None in [self.js_file_name, self.node_path, self.jshint_path]:
+            return None
+
+        command = self.create_command()
+        
+        proc = subprocess.Popen(command,
+                            stdout=subprocess.PIPE,
+                            stderr=subprocess.PIPE,
+                            startupinfo=STARTUPINFO)
+
+        (out, err) = proc.communicate()
+
+        if type(err) == bytes and len(err) > 0:
+            raise Error(err)
+
+        new_errors = json.loads(out.decode())
+
+        # for line in new_errors:
+        sublime.set_timeout(lambda: self.draw_lines(new_errors), 100)
+        
+        if len(new_errors) == 0:
+            self.errors = {}
+        else:
+            self.errors.update(new_errors)
+
+    def create_command(self):
+        """
+        Create command list
+        """
+
+        command = []
+
+        command.append(self.node_path)
+        command.append(self.jshint_path)
+        
+        command.append("--reporter")
+        reporter_path = "{packages_dir}/jshintify/json-reporter.js".format(
+                packages_dir = sublime.packages_path()
+            )
+        command.append(reporter_path)
+
+        if len(self.jshintrc) > 0:
+            command.append("--config")
+            command.append(self.jshintrc)
+
+        command.append(self.js_file_name)
+
+        return command
+
+    def draw_lines(self, errors):
+        """ Draw outline and/or 'dot'. """
+
+        for line_number in errors:
+            dot_sign = ''
+            if SHOW_DOT:
+                dot_sign = 'dot'
+
+            draw_type = sublime.DRAW_OUTLINED
+            if not SHOW_OUTLINE:
+                draw_type = sublime.HIDDEN
+
+            line = self.view.line(self.view.text_point(int(line_number) - 1, 0))
+            self.view.add_regions('jshintify.error.' + str(line_number), [line],
+                            'jshintify.error.' + str(line_number), dot_sign, draw_type)
+    
+
+def check_file(view):
+    """
+    Get current filename
+    """
+
+    js_file_name = ""
+    if view.file_name() is not None:
+        js_file_name = view.file_name()
+    elif view.window() is not None and view.window().active_view().file_name() is not None:
+        js_file_name = view.window().active_view().file_name()
+    else:
+        raise Error("This may be a bug, please create issue on github")
+
+    if os.path.splitext(js_file_name)[1] not in EXTENSIONS:
+        return False
+
+    return js_file_name
 
 class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
     """Command to clear the sniffer marks from the view"""
@@ -94,122 +211,23 @@ class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):#pylint: disable-ms
         """
         row = self.view.rowcol(self.view.sel()[0].begin())[0]
 
-        try:
-            js_file_name_hash = check_file(self.view)[1]
-        except Error:
-            return
-
-        if js_file_name_hash in ERRORS and str(row + 1) in ERRORS[js_file_name_hash]:
+        if str(row + 1) in ERRORS:
             error_data = []
-            for error in ERRORS[js_file_name_hash][str(row + 1)]:
+            for error in ERRORS[str(row + 1)]:
                 error_data.append(get_error_string(error))
 
             self.view.window().show_quick_panel(error_data, None, sublime.MONOSPACE_FONT)
 
-def check_file(view):
-    """
-    Get current filename
-    """
-    js_file_name = ""
-    if view.file_name() is not None:
-        js_file_name = view.file_name()
-    elif view.window() is not None and view.window().active_view().file_name() is not None:
-        js_file_name = view.window().active_view().file_name()
+def progress_tracker(thread, i=0):
+    """ Show some stuff """
+
+    icons = [u"◐", u"◓", u"◑", u"◒"]
+    sublime.status_message("jshinting %s" % icons[i])
+    if thread.is_alive():
+        i = (i + 1) % 4
+        sublime.set_timeout(lambda: progress_tracker(thread, i), 100)
     else:
-        raise Error("This may be a bug, please create issue on github")
-
-    if os.path.splitext(js_file_name)[1] not in EXTENSIONS:
-        raise Error("File not on list")
-
-    return (js_file_name, sha1(js_file_name.encode('utf-8')).hexdigest())
-
-
-def create_command(settings, js_file_name):
-    """
-    Create command list
-    """
-
-    command = []
-    platform = sublime.platform()
-    if platform not in settings.get('paths') or len(settings.get('paths')[platform]['node_path']) == 0 or \
-        len(settings.get('paths')[platform]['jshint_path']) == 0:
-        print("SET PATHS FOR NODE AND JSHINT FOR YOUR PLATFORM")
-
-        return False
-
-    command.append(settings.get('paths')[platform]['node_path'])
-    command.append(settings.get("paths")[platform]['jshint_path'])
-    
-    command.append("--reporter")
-    reporter_path = "{packages_dir}/jshintify/json-reporter.js".format(
-            packages_dir = sublime.packages_path()
-        )
-    command.append(reporter_path)
-
-    if len(settings.get("jshintrc")) > 0:
-        command.append("--config")
-        command.append(settings.get("jshintrc"))
-
-    command.append(js_file_name)
-
-    return command
-
-def run_jshint(view, errors, settings):
-    """
-    Run jshint
-    """
-    
-    try:
-        (js_file_name, js_file_name_hash) = check_file(view)
-    except Error:
-        return
-
-    if js_file_name_hash not in errors:
-        errors[js_file_name_hash] = {}
-
-    command = create_command(settings, js_file_name)
-    if command == False:
-        return
-
-    proc = subprocess.Popen(command,
-                        stdout=subprocess.PIPE,
-                        stderr=subprocess.PIPE)
-    (out, err) = proc.communicate()
-
-    if type(err) == bytes and len(err) > 0:
-        raise Error(err)
-
-    new_errors = json.loads(out.decode())
-
-    for line in errors[js_file_name_hash]:
-        if line not in new_errors:
-            draw_line(view, line, sublime.DRAW_EMPTY_AS_OVERWRITE)
-            view.erase_regions('jshintify.error')
-        else:
-            del new_errors[line]
-
-    for line in new_errors:
-        draw_line(view, line, sublime.DRAW_OUTLINED)
-    
-    if len(new_errors) == 0:
-        errors[js_file_name_hash] = {}
-    else:
-        errors[js_file_name_hash].update(new_errors)
-
-def draw_line(view, line_number, draw_type):
-    """
-    Draw outline/"dot".
-    """
-    dot_sign = ''
-    if SHOW_DOT and draw_type != sublime.DRAW_EMPTY_AS_OVERWRITE:
-        dot_sign = 'dot'
-
-    if not SHOW_OUTLINE:
-        draw_type = sublime.DRAW_EMPTY_AS_OVERWRITE
-
-    line = view.line(view.text_point(int(line_number) - 1, 0))
-    view.add_regions('jshintify.error.' + line_number, [line],
-                    'jshintify.error', dot_sign, draw_type)
+        sublime.status_message("")
 
 def get_error_string(error):
     """
