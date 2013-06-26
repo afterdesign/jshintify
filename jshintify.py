@@ -197,7 +197,7 @@ def check_file(view):
         raise Error("This may be a bug, please create issue on github")
 
     if os.path.splitext(js_file_name)[1] not in EXTENSIONS:
-        return False
+        return None
 
     return js_file_name
 
