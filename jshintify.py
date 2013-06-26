@@ -107,7 +107,7 @@ class JshintifyThread(threading.Thread):
         self.node_path = self.settings.get('paths')[platform]['node_path'] or 'node'
         self.jshint_path = self.settings.get("paths")[platform]['jshint_path'] or 'jshint'
 
-        self.jshintrc = self.settings.get("jshintrc") or None
+        self.jshintrc = self.settings.get("jshintrc", None)
 
         for line in self.errors:
             self.view.erase_regions('jshintify.error.' + str(line))
@@ -158,7 +158,7 @@ class JshintifyThread(threading.Thread):
             )
         command.append(reporter_path)
 
-        if len(self.jshintrc) > 0:
+        if self.jshintrc is not None:
             command.append("--config")
             command.append(self.jshintrc)
 
