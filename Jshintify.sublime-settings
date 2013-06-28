@@ -1,5 +1,5 @@
 {
-    "run_on_load" : false,
+    "run_on_load" : true,
     "run_on_save" : true,
 
     "error_messages_show_count" : true,

@@ -149,16 +149,18 @@ class JshintifyThread(threading.Thread):
 
         command = []
 
-        command.append(self.node_path)
+        if sublime.platform() != "windows":
+            command.append(self.node_path)
+
         command.append(self.jshint_path)
         
         command.append("--reporter")
-        reporter_path = "{packages_dir}/jshintify/json-reporter.js".format(
-                packages_dir = sublime.packages_path()
-            )
+
+        reporter_path = os.path.join(sublime.packages_path(), 'jshintify', 'json-reporter.js')
+        
         command.append(reporter_path)
 
-        if self.jshintrc is not None:
+        if self.jshintrc is not None and len(self.jshintrc) > 0:
             command.append("--config")
             command.append(self.jshintrc)
 
