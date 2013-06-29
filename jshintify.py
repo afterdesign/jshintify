@@ -29,6 +29,8 @@ EXTENSIONS = SETTINGS.get('extensions', [])
 SHOW_DOT = SETTINGS.get('show_dot', False)
 SHOW_OUTLINE = SETTINGS.get('show_outline', False)
 
+DEBUG = SETTINGS.get('debug', False)
+
 # for now let's cache those errors
 ERRORS = {}
 
@@ -61,6 +63,9 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
             thread.start()
             progress_tracker(thread)
 
+        if DEBUG:
+            print("RUN ON SAVE: ", RUN_ON_SAVE)
+
     def on_load(self, view):#pylint: disable-msg=R0201
         """
         Event triggered after file open
@@ -69,6 +74,9 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
             thread = JshintifyThread(view, ERRORS, SETTINGS)
             thread.start()
             progress_tracker(thread)
+
+        if DEBUG:
+            print("RUN ON SAVE: ", RUN_ON_LOAD)
 
     def on_selection_modified(self, view):#pylint: disable-msg=R0201
         """ Event triggered during moving in editor """
@@ -104,7 +112,7 @@ class JshintifyThread(threading.Thread):
 
         platform = sublime.platform()
 
-        self.node_path = self.settings.get('paths')[platform]['node_path'] or 'node'
+        self.node_path = self.settings.get('paths')[platform]['node_path']
         self.jshint_path = self.settings.get("paths")[platform]['jshint_path'] or 'jshint'
 
         self.jshintrc = self.settings.get("jshintrc", None)
@@ -116,23 +124,35 @@ class JshintifyThread(threading.Thread):
         """
         Run jshint
         """
-        print self.js_file_name, self.node_path, self.jshint_path
-        if None in [self.js_file_name, self.node_path, self.jshint_path]:
+
+        if DEBUG:
+            print("PATHS: ", self.js_file_name, self.jshint_path, self.node_path)
+
+        if None in [self.js_file_name, self.jshint_path]:
             return None
 
         command = self.create_command()
-        
+
+        if DEBUG:
+            print("COMMAND: ", command)
+
         proc = subprocess.Popen(command,
                             stdout=subprocess.PIPE,
                             stderr=subprocess.PIPE,
                             startupinfo=STARTUPINFO)
 
         (out, err) = proc.communicate()
-
+        
         if type(err) == bytes and len(err) > 0:
+            if DEBUG:
+                print("ERROR FROM JSHINT: ", err)
+
             raise Error(err)
 
         new_errors = json.loads(out.decode())
+
+        if DEBUG:
+            print("ERRORS COUNT:", len(new_errors))
 
         # for line in new_errors:
         sublime.set_timeout(lambda: self.draw_lines(new_errors), 100)
@@ -149,15 +169,15 @@ class JshintifyThread(threading.Thread):
 
         command = []
 
-        if sublime.platform() != "windows":
+        if self.node_path is not None:
             command.append(self.node_path)
 
         command.append(self.jshint_path)
-        
+
         command.append("--reporter")
 
         reporter_path = os.path.join(sublime.packages_path(), 'jshintify', 'json-reporter.js')
-        
+
         command.append(reporter_path)
 
         if self.jshintrc is not None and len(self.jshintrc) > 0:

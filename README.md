@@ -1,11 +1,13 @@
+[![endorse](https://api.coderwall.com/afterdesign/endorsecount.png)](https://coderwall.com/afterdesign)
+
 # yet another jshint plugin for sublime
 
 # How to install ?
 ## OSX:
 
-1. ```brew install nodejs``` - this will take while
-2. add ```/usr/local/share/npm/bin``` to $PATH or 
-3. ```npm install jshint -g```
+1. install [nodejs >= 0.8](http://nodejs.org/download/) ```brew install nodejs``` - this will take a while
+2. preferably add ```/usr/local/share/npm/bin``` to $PATH
+3. install [jshint](http://www.jshint.com/) ```npm install jshint -g```
 4. install jshintify sublime package (for now only git):
 
     ```
@@ -14,33 +16,57 @@
     ```
 5. open preferences and check if the paths for node and jshint are correct
 6. set the path to your jshint file
-7. use ```ctrl+super+j``` to run
+7. use ```ctrl+super+j``` to run manually
 8. use ``` ctrl+shift+j``` to show list of errors in current line
 
 ## Windows:
-1. Install [nodejs](http://nodejs.org/download/)
-2. Install [git](http://git-scm.com/)
-3. Open ```node.js command prompt``` and type:
 
-	```
-	npm install jshint -g
-	```
-4. Open ```git Bash prompt``` and do something similar to:
+1. install [nodejs >= 0.8](http://nodejs.org/download/)
+2. install [git](http://git-scm.com/)
+3. open ```node.js command prompt``` and install [jshint](http://www.jshint.com/):
 
-	```
-	cd $PATH_OF_SUBLIME_PACKAGES (probably something like /c/Document\ And\ Settings/YOUR_USER/Application\ Data/Sublime\ Text\ 2/Packages/)
-	git clone git://github.com/afterdesign/jshintify.git
-	```
-5. Check ```jshint_path``` cause it's set up to ```jshint.cmd``` and it may require to find that file and set whole path like:
-	
-	```
-	C:\\Documents And Settings'\IEUser\\Application Data\\npm\\jshint.cmd
-	```
+    ```
+    npm install jshint -g
+    ```
+4. open ```git Bash prompt``` and do something similar to:
 
-6. Open sublime and configure jshint with some awesome [jshitrc](http://www.jshint.com/docs/#usage) file
+    ```
+    cd $PATH_OF_SUBLIME_PACKAGES (probably something like /c/Document\ And\ Settings/YOUR_USER/Application\ Data/Sublime\ Text\ 2/Packages/)
+    git clone git://github.com/afterdesign/jshintify.git
+    ```
+5. check ```jshint_path``` cause it's set up to ```jshint.cmd``` and it may require to find that file and set whole path like:
+    
+    ```
+    C:\\Documents And Settings'\IEUser\\Application Data\\npm\\jshint.cmd
+    ```
 
+6. set the path to your jshint file
+7. use ```ctrl+super+j``` to run manually
+8. use ``` ctrl+shift+j``` to show list of errors in current line
 
-## Default settings:
+## Linux:
+
+1. Install [nodejs >= 0.8](http://nodejs.org/download/). Preferably with package manager.
+2. install [jshint](http://www.jshint.com/) ```npm install jshint -g```
+3. install jshintify sublime package (for now only git):
+
+    ```
+    cd $PATH_OF_SUBLIME_PACKAGES (probably somethint like cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/)
+    git clone git://github.com/afterdesign/jshintify.git
+    ```
+4. open preferences and check if the paths for node and jshint are correct
+5. set the path to your jshint file
+6. use ```ctrl+super+j``` to run manually
+7. use ``` ctrl+shift+j``` to show list of errors in current line
+
+## Pure download version:
+1. Download [nodejs >= 0.8](http://nodejs.org/download/) binary.
+2. Unpack
+3. Open terminal or whatever you need and go to ```node-v0.10.12-linux-x64/bin```
+4. install jshint ```./npm install jshint -g```
+5. Configure paths in sublime jshintify plugin.
+
+# Default settings:
 
 1. ```run_on_load``` - run jshint right after file is loaded do editor
 2. ```run_on_save``` - run jshint after file is saved
@@ -58,10 +84,12 @@
     ```
 4. ```show_dot``` - show dot on panel with line number
 5. ```show_outline``` - draw outline on line with error
-
+6. ```debug``` - use to get info to post in github issue
 
 ```
 {
+    "debug" : false,
+
     "run_on_load" : false,
     "run_on_save" : true,
 
@@ -69,7 +97,7 @@
     "error_messages_show_first" : true,
 
     "extensions" : [".js"],
-    "jshintrc" : "/Users/afterdesign/Projects/redsky-linters/JavaScript/jshintrc",
+    "jshintrc" : "",
 
     "show_dot" : true,
     "show_outline" : true,
@@ -80,25 +108,22 @@
             "node_path" : "/usr/local/bin/node"
         },
         "windows" : {
-            "jshint_path" : "",
-            "node_path" : ""
+            "jshint_path" : "jshint.cmd",
+            "node_path" : null
         },
         "linux" : {
-            "jshint_path" : "",
-            "node_path" : ""
+            "jshint_path" : "/usr/bin/jshint",
+            "node_path" : "/usr/bin/node"
         }
     }
 }
 ```
 
-## Linux & Windows
-
-It should work just fine. You need to set paths for jshint and node.
-If you want to add default paths then write issue or create pull request.
-
 # Contact
 
 You can follow me on twitter: [@afterdesign](http://twitter.com/afterdesign)
+or find me on coderwall: [@afterdesign](http://coderwall.com/afterdesign)
+or find me on g+: 
 
 # License
 

@@ -1,5 +1,7 @@
 {
-    "run_on_load" : true,
+    "debug" : false,
+
+    "run_on_load" : false,
     "run_on_save" : true,
 
     "error_messages_show_count" : true,
@@ -17,12 +19,12 @@
             "node_path" : "/usr/local/bin/node"
         },
         "windows" : {
-            "jshint_path" : "",
-            "node_path" : ""
+            "jshint_path" : "jshint.cmd",
+            "node_path" : null
         },
         "linux" : {
-            "jshint_path" : "",
-            "node_path" : ""
+            "jshint_path" : "/usr/bin/jshint",
+            "node_path" : "/usr/bin/node"
         }
     }
 }
