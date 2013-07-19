@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Jshintify by afterdesign</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <h1>Jshintify</h1>
+        <h2>Sublime Text jshint plugin.</h2>
+        <a href="https://github.com/afterdesign/jshintify" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <p><a href="https://coderwall.com/afterdesign"><img src="https://api.coderwall.com/afterdesign/endorsecount.png" alt="endorse"></a></p>
+
+<h1>
+<a name="yet-another-jshint-plugin-for-sublime" class="anchor" href="#yet-another-jshint-plugin-for-sublime"><span class="octicon octicon-link"></span></a>yet another jshint plugin for sublime</h1>
+
+<h1>
+<a name="how-to-install-" class="anchor" href="#how-to-install-"><span class="octicon octicon-link"></span></a>How to install ?</h1>
+
+<h2>
+<a name="osx" class="anchor" href="#osx"><span class="octicon octicon-link"></span></a>OSX:</h2>
+
+<ol>
+<li>install <a href="http://nodejs.org/download/">nodejs &gt;= 0.8</a> <code>brew install nodejs</code> - this will take a while</li>
+<li>preferably add <code>/usr/local/share/npm/bin</code> to $PATH</li>
+<li>install <a href="http://www.jshint.com/">jshint</a> <code>npm install jshint -g</code>
+</li>
+<li>
+<p>install jshintify sublime package (for now only git):</p>
+
+<pre><code>cd $PATH_OF_SUBLIME_PACKAGES (probably somethint like cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/)
+git clone git://github.com/afterdesign/jshintify.git
+</code></pre>
+</li>
+<li><p>open preferences and check if the paths for node and jshint are correct</p></li>
+<li><p>set the path to your jshint file</p></li>
+<li><p>use <code>ctrl+super+j</code> to run manually</p></li>
+<li><p>use <code>ctrl+shift+j</code> to show list of errors in current line</p></li>
+</ol><h2>
+<a name="windows" class="anchor" href="#windows"><span class="octicon octicon-link"></span></a>Windows:</h2>
+
+<ol>
+<li>install <a href="http://nodejs.org/download/">nodejs &gt;= 0.8</a>
+</li>
+<li>install <a href="http://git-scm.com/">git</a>
+</li>
+<li>
+<p>open <code>node.js command prompt</code> and install <a href="http://www.jshint.com/">jshint</a>:</p>
+
+<pre><code>npm install jshint -g
+</code></pre>
+</li>
+<li>
+<p>open <code>git Bash prompt</code> and do something similar to:</p>
+
+<pre><code>cd $PATH_OF_SUBLIME_PACKAGES (probably something like /c/Document\ And\ Settings/YOUR_USER/Application\ Data/Sublime\ Text\ 2/Packages/)
+git clone git://github.com/afterdesign/jshintify.git
+</code></pre>
+</li>
+<li>
+<p>check <code>jshint_path</code> cause it's set up to <code>jshint.cmd</code> and it may require to find that file and set whole path like:</p>
+
+<pre><code>C:\\Documents And Settings'\IEUser\\Application Data\\npm\\jshint.cmd
+</code></pre>
+</li>
+<li><p>set the path to your jshint file</p></li>
+<li><p>use <code>ctrl+super+j</code> to run manually</p></li>
+<li><p>use <code>ctrl+shift+j</code> to show list of errors in current line</p></li>
+</ol><h2>
+<a name="linux" class="anchor" href="#linux"><span class="octicon octicon-link"></span></a>Linux:</h2>
+
+<ol>
+<li>Install <a href="http://nodejs.org/download/">nodejs &gt;= 0.8</a>. Preferably with package manager.</li>
+<li>install <a href="http://www.jshint.com/">jshint</a> <code>npm install jshint -g</code>
+</li>
+<li>
+<p>install jshintify sublime package (for now only git):</p>
+
+<pre><code>cd $PATH_OF_SUBLIME_PACKAGES (probably somethint like cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/)
+git clone git://github.com/afterdesign/jshintify.git
+</code></pre>
+</li>
+<li><p>open preferences and check if the paths for node and jshint are correct</p></li>
+<li><p>set the path to your jshint file</p></li>
+<li><p>use <code>ctrl+super+j</code> to run manually</p></li>
+<li><p>use <code>ctrl+shift+j</code> to show list of errors in current line</p></li>
+</ol><h2>
+<a name="pure-download-version" class="anchor" href="#pure-download-version"><span class="octicon octicon-link"></span></a>Pure download version:</h2>
+
+<ol>
+<li>Download <a href="http://nodejs.org/download/">nodejs &gt;= 0.8</a> binary.</li>
+<li>Unpack</li>
+<li>Open terminal or whatever you need and go to <code>node-v0.10.12-linux-x64/bin</code>
+</li>
+<li>install jshint <code>./npm install jshint -g</code>
+</li>
+<li>Configure paths in sublime jshintify plugin.</li>
+</ol><h1>
+<a name="default-settings" class="anchor" href="#default-settings"><span class="octicon octicon-link"></span></a>Default settings:</h1>
+
+<ol>
+<li>
+<code>run_on_load</code> - run jshint right after file is loaded do editor</li>
+<li>
+<code>run_on_save</code> - run jshint after file is saved</li>
+<li>
+<p><code>error_messages_show_count</code> and <code>error_messages_show_first</code>
+<code>error_messages_show_count : false</code> show message like:</p>
+
+<pre><code>(error) : Expected 'for' to have an indentation at 13 instead at 9.
+</code></pre>
+
+<p><code>"error_messages_show_count" : true</code> show message like:</p>
+
+<pre><code>ERRORS : 1 | (error) : Expected 'for' to have an indentation at 13 instead at 9.
+</code></pre>
+</li>
+<li><p><code>show_dot</code> - show dot on panel with line number</p></li>
+<li><p><code>show_outline</code> - draw outline on line with error</p></li>
+<li><p><code>debug</code> - use to get info to post in github issue</p></li>
+</ol><pre><code>{
+    "debug" : false,
+
+    "run_on_load" : false,
+    "run_on_save" : true,
+
+    "error_messages_show_count" : true,
+    "error_messages_show_first" : true,
+
+    "extensions" : [".js"],
+    "jshintrc" : "",
+
+    "show_dot" : true,
+    "show_outline" : true,
+
+    "paths" : {
+        "osx" : {
+            "jshint_path" : "/usr/local/share/npm/bin/jshint",
+            "node_path" : "/usr/local/bin/node"
+        },
+        "windows" : {
+            "jshint_path" : "jshint.cmd",
+            "node_path" : null
+        },
+        "linux" : {
+            "jshint_path" : "/usr/bin/jshint",
+            "node_path" : "/usr/bin/node"
+        }
+    }
+}
+</code></pre>
+
+<h1>
+<a name="contact" class="anchor" href="#contact"><span class="octicon octicon-link"></span></a>Contact</h1>
+
+<p>You can follow me on twitter: <a href="http://twitter.com/afterdesign">@afterdesign</a>
+or find me on coderwall: <a href="http://coderwall.com/afterdesign">@afterdesign</a>
+or find me on g+: <a href="https://plus.google.com/117103637919115489068/posts">@117103637919115489068</a> (those sexy g+ urls)</p>
+
+<h1>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h1>
+
+<p>Licensed under the <a href="http://opensource.org/licenses/MIT">MIT license</a>.</p>
+        </section>
+
+        <aside id="sidebar">
+          <a href="https://github.com/afterdesign/jshintify/zipball/master" class="button">
+            <small>Download</small>
+            .zip file
+          </a>
+          <a href="https://github.com/afterdesign/jshintify/tarball/master" class="button">
+            <small>Download</small>
+            .tar.gz file
+          </a>
+
+          <p class="repo-owner"><a href="https://github.com/afterdesign/jshintify"></a> is maintained by <a href="https://github.com/afterdesign">afterdesign</a>.</p>
+
+          <p>This page was generated by <a href="pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
+        </aside>
+      </div>
+    </div>
+
+            <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-42588865-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
