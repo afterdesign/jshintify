@@ -6,7 +6,7 @@
             "description": "Run jshint with your own jshintrc and show errors in status bar.",
             "author": "Rafał 'afterdesign' Malinowski",
             "homepage": "https://github.com/afterdesign/jshintify",
-            "last_modified": "2013-05-03 20:23",
+            "last_modified": "2013-06-29 14:20",
             "platforms": {
                 "*": [
                     {

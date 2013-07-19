@@ -10,6 +10,8 @@ import sublime
 import subprocess
 import json
 
+from hashlib import md5
+
 if os.name == "nt":
     STARTUPINFO = subprocess.STARTUPINFO()
     STARTUPINFO.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -80,15 +82,23 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
 
     def on_selection_modified(self, view):#pylint: disable-msg=R0201
         """ Event triggered during moving in editor """
+        file_name = check_file(view)
+
+        if file_name is None:
+            return
+
+        file_hash = md5(file_name).hexdigest()
+        if file_hash not in ERRORS:
+            return
 
         row = view.rowcol(view.sel()[0].begin())[0]
 
-        if str(row + 1) in ERRORS:
-            this_error = ERRORS[str(row + 1)][0]
+        if str(row + 1) in ERRORS[file_hash]:
+            this_error = ERRORS[file_hash][str(row + 1)][0]
 
             string = ''
             if ERRORS_SHOW_COUNT:
-                string += "ERRORS : {count} | ".format(count = len(ERRORS[str(row + 1)]))
+                string += "ERRORS : {count} | ".format(count = len(ERRORS[file_hash][str(row + 1)]))
 
             if ERRORS_SHOW_FIRST:
                 string += get_error_string(this_error)
@@ -101,6 +111,9 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
 class JshintifyThread(threading.Thread):
     """ docstring for JshintifyThread """
 
+    jshint_path = None
+    node_path = None
+
     def __init__(self, view, errors, settings):
         super(JshintifyThread, self).__init__()
 
@@ -109,6 +122,9 @@ class JshintifyThread(threading.Thread):
         self.settings = settings
         
         self.js_file_name = check_file(view) or None
+
+        if self.js_file_name is not None:
+            self.js_file_hash = md5(self.js_file_name).hexdigest()
 
         platform = sublime.platform()
 
@@ -157,10 +173,13 @@ class JshintifyThread(threading.Thread):
         # for line in new_errors:
         sublime.set_timeout(lambda: self.draw_lines(new_errors), 100)
         
+        if self.js_file_hash not in self.errors:
+            self.errors[self.js_file_hash] = {}
+        
         if len(new_errors) == 0:
-            self.errors = {}
+            self.errors[self.js_file_hash] = {}
         else:
-            self.errors.update(new_errors)
+            self.errors[self.js_file_hash].update(new_errors)
 
     def create_command(self):
         """
@@ -203,7 +222,6 @@ class JshintifyThread(threading.Thread):
             line = self.view.line(self.view.text_point(int(line_number) - 1, 0))
             self.view.add_regions('jshintify.error.' + str(line_number), [line],
                             'jshintify.error.' + str(line_number), dot_sign, draw_type)
-    
 
 def check_file(view):
     """
@@ -232,10 +250,19 @@ class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):#pylint: disable-ms
         Run plugin
         """
         row = self.view.rowcol(self.view.sel()[0].begin())[0]
+        
+        file_name = check_file(self.view)
+        if file_name is None:
+            return
 
-        if str(row + 1) in ERRORS:
+        file_hash = md5(file_name).hexdigest()
+
+        if file_hash not in ERRORS:
+            return
+
+        if str(row + 1) in ERRORS[file_hash]:
             error_data = []
-            for error in ERRORS[str(row + 1)]:
+            for error in ERRORS[file_hash][str(row + 1)]:
                 error_data.append(get_error_string(error))
 
             self.view.window().show_quick_panel(error_data, None, sublime.MONOSPACE_FONT)
