@@ -1,1 +1,18 @@
-Before saying "it's not working" go to http://github.com/afterdesign/jshintify and read README !
+Thank you for installing jshintify !
+If You like this project - hit it with a star or something ツ
+
+---
+
+Go to http://malinowski.be/jshintify and read about what you need to get this plugin get working.
+It needs nodejs.
+I'll update README when this package will be available through Package Control.
+
+Found a bug ? Enable debug in config and post an issue on: https://github.com/afterdesign/jshintify/issues
+
+---
+
+You can find me:
+
+@afterdesign on twitter.com
+https://coderwall.com/afterdesign
+or (https://plus.google.com/117103637919115489068/posts)

@@ -123,7 +123,7 @@
 
 You can follow me on twitter: [@afterdesign](http://twitter.com/afterdesign)
 or find me on coderwall: [@afterdesign](http://coderwall.com/afterdesign)
-or find me on g+: 
+or find me on g+: [@117103637919115489068](https://plus.google.com/117103637919115489068/posts) (those sexy g+ urls)
 
 # License
 
