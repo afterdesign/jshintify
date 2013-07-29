@@ -133,9 +133,9 @@ class JshintifyThread(threading.Thread):
 
         self.jshintrc = self.settings.get("jshintrc", None)
 
-        for line in self.errors:
-            self.view.erase_regions('jshintify.error.' + str(line))
-
+        if self.js_file_hash in self.errors:
+            for line in self.errors[self.js_file_hash]:
+                self.view.erase_regions('jshintify.error.' + str(line))
     def run(self):
         """
         Run jshint
