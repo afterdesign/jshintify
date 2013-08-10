@@ -1,20 +1,19 @@
 {
-    "schema_version": "1.2",
+    "schema_version": "2.0",
     "packages": [
         {
             "name": "jshintify",
             "description": "Run jshint with your own jshintrc and show errors in status bar.",
             "author": "Rafał 'afterdesign' Malinowski",
-            "homepage": "https://malinowski.be/jshintify",
-            "last_modified": "2013-07-29 20:34",
-            "platforms": {
-                "*": [
-                    {
-                        "version": "1.0.5",
-                        "url": "https://codeload.github.com/afterdesign/jshintify/zip/1.0.5"
-                    }
-                ]
-            }
+            "homepage": "https://github.com/afterdesign/MacTerminal",
+            "releases" : [
+                {
+                    "sublime_text": "<3000",
+                    "version": "1.0.6",
+                    "url": "https://codeload.github.com/afterdesign/MacTerminal/zip/1.0.6",
+                    "date": "2013-08-10 21:44",
+                }
+            ]
         }
     ]
 }

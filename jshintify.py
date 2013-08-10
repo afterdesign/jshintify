@@ -125,6 +125,8 @@ class JshintifyThread(threading.Thread):
 
         if self.js_file_name is not None:
             self.js_file_hash = md5(self.js_file_name).hexdigest()
+        else:
+            return None
 
         platform = sublime.platform()
 
@@ -233,7 +235,7 @@ def check_file(view):
         js_file_name = view.file_name()
     elif view.window() is not None and view.window().active_view().file_name() is not None:
         js_file_name = view.window().active_view().file_name()
-    else:
+    elif DEBUG:
         raise Error("This may be a bug, please create issue on github")
 
     if os.path.splitext(js_file_name)[1] not in EXTENSIONS:

@@ -4,7 +4,7 @@ If You like this project - hit it with a star or something ツ
 ---
 
 Go to http://malinowski.be/jshintify and read about what you need to get this plugin get working.
-It needs nodejs.
+This plugin needs nodejs !
 I'll update README when this package will be available through Package Control.
 
 Found a bug ? Enable debug in config and post an issue on: https://github.com/afterdesign/jshintify/issues
