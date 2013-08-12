@@ -5,7 +5,8 @@
             "name": "jshintify",
             "description": "Run jshint with your own jshintrc and show errors in status bar.",
             "author": "Rafał 'afterdesign' Malinowski",
-            "homepage": "https://github.com/afterdesign/MacTerminal",
+            "homepage": "http://malinowski.be/jshintify/",
+            "readme": "https://raw.github.com/afterdesign/jshintify/master/README.md",
             "labels": ["linting"],
             "releases" : [
                 {
