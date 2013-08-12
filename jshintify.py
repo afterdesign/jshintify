@@ -167,7 +167,7 @@ class JshintifyThread(threading.Thread):
 
             raise Error(err)
 
-        new_errors = json.loads(out.decode())
+        new_errors = json.loads(out)
 
         if DEBUG:
             print("ERRORS COUNT:", len(new_errors))

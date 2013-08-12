@@ -6,12 +6,12 @@
             "description": "Run jshint with your own jshintrc and show errors in status bar.",
             "author": "Rafał 'afterdesign' Malinowski",
             "homepage": "https://github.com/afterdesign/MacTerminal",
+            "labels": ["linting"],
             "releases" : [
                 {
                     "sublime_text": "<3000",
-                    "version": "1.0.6",
-                    "url": "https://codeload.github.com/afterdesign/MacTerminal/zip/1.0.6",
-                    "date": "2013-08-10 21:44",
+                    "details": "https://github.com/afterdesign/jshintify/tags",
+                    "date": "2013-08-12 20:42"
                 }
             ]
         }
