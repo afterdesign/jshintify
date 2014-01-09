@@ -11,8 +11,7 @@
             "releases" : [
                 {
                     "sublime_text": "<3000",
-                    "details": "https://github.com/afterdesign/jshintify/tags",
-                    "date": "2013-08-13 17:51:00"
+                    "details": "https://github.com/afterdesign/jshintify/tags"
                 }
             ]
         }
