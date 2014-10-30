@@ -8,7 +8,7 @@
 1. install [nodejs >= 0.8](http://nodejs.org/download/) ```brew install nodejs``` - this will take a while
 2. preferably add ```/usr/local/share/npm/bin``` to $PATH
 3. install [jshint](http://www.jshint.com/) ```npm install jshint -g```
-4. install jshintify sublime package (for now only git):
+4. install jshintify sublime package from git (or just use [package control](https://sublime.wbond.net/)):
 
     ```
     cd $PATH_OF_SUBLIME_PACKAGES (probably somethint like cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/)
@@ -28,14 +28,14 @@
     ```
     npm install jshint -g
     ```
-4. open ```git Bash prompt``` and do something similar to:
+4. open ```git Bash prompt``` and do something similar to (or just use [package control](https://sublime.wbond.net/)):
 
     ```
     cd $PATH_OF_SUBLIME_PACKAGES (probably something like /c/Document\ And\ Settings/YOUR_USER/Application\ Data/Sublime\ Text\ 2/Packages/)
     git clone git://github.com/afterdesign/jshintify.git
     ```
 5. check ```jshint_path``` cause it's set up to ```jshint.cmd``` and it may require to find that file and set whole path like:
-    
+
     ```
     C:\\Documents And Settings'\IEUser\\Application Data\\npm\\jshint.cmd
     ```
@@ -48,7 +48,7 @@
 
 1. Install [nodejs >= 0.8](http://nodejs.org/download/). Preferably with package manager.
 2. install [jshint](http://www.jshint.com/) ```npm install jshint -g```
-3. install jshintify sublime package (for now only git):
+3. install jshintify sublime package ((or just use [package control](https://sublime.wbond.net/))):
 
     ```
     cd $PATH_OF_SUBLIME_PACKAGES (probably somethint like cd ~/Library/Application\ Support/Sublime\ Text\ 2/Packages/)
@@ -76,9 +76,9 @@
     ```
     (error) : Expected 'for' to have an indentation at 13 instead at 9.
     ```
-    
+
     ```"error_messages_show_count" : true``` show message like:
-    
+
     ```
     ERRORS : 1 | (error) : Expected 'for' to have an indentation at 13 instead at 9.
     ```
@@ -123,7 +123,7 @@
 
 You can follow me on twitter: [@afterdesign](http://twitter.com/afterdesign)
 or find me on coderwall: [@afterdesign](http://coderwall.com/afterdesign)
-or find me on g+: [@117103637919115489068](https://plus.google.com/117103637919115489068/posts) (those sexy g+ urls)
+or find me on g+: [+RafałMalinowski](https://plus.google.com/+Rafa%C5%82Malinowski/posts)
 
 # License
 

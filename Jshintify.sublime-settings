@@ -15,7 +15,7 @@
 
     "paths" : {
         "osx" : {
-            "jshint_path" : "/usr/local/share/npm/bin/jshint",
+            "jshint_path" : "/usr/local/bin/jshint",
             "node_path" : "/usr/local/bin/node"
         },
         "windows" : {

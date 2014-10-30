@@ -36,12 +36,14 @@ DEBUG = SETTINGS.get('debug', False)
 # for now let's cache those errors
 ERRORS = {}
 
-class Jshintify(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
+
+class Jshintify(sublime_plugin.TextCommand):  # pylint: disable-msg=R0903,W0232
+
     '''
     Run jshint from sublime with configured shortcut
     '''
 
-    def run(self, edit):#pylint: disable-msg=R0903,W0232,W0613
+    def run(self, edit):  # pylint: disable-msg=R0903,W0232,W0613
         '''
         Sublime text runs this
 
@@ -51,12 +53,14 @@ class Jshintify(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
         thread.start()
         progress_tracker(thread)
 
-class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=R0903,W0232,W0613
+
+class JslintifyEventListener(sublime_plugin.EventListener):  # pylint: disable-msg=R0903,W0232,W0613
+
     """
     Class for event listeners
     """
 
-    def on_post_save(self, view):#pylint: disable-msg=R0201
+    def on_post_save(self, view):  # pylint: disable-msg=R0201
         """
         Event triggered after file save
         """
@@ -68,7 +72,7 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
         if DEBUG:
             print("RUN ON SAVE: ", RUN_ON_SAVE)
 
-    def on_load(self, view):#pylint: disable-msg=R0201
+    def on_load(self, view):  # pylint: disable-msg=R0201
         """
         Event triggered after file open
         """
@@ -80,25 +84,26 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
         if DEBUG:
             print("RUN ON SAVE: ", RUN_ON_LOAD)
 
-    def on_selection_modified(self, view):#pylint: disable-msg=R0201
+    def on_selection_modified(self, view):  # pylint: disable-msg=R0201
         """ Event triggered during moving in editor """
         file_name = check_file(view)
 
         if file_name is None:
             return
 
-        file_hash = md5(file_name).hexdigest()
+        file_hash = md5(file_name.encode('utf-8')).hexdigest()
         if file_hash not in ERRORS:
             return
 
-        row = view.rowcol(view.sel()[0].begin())[0]
+        row = view.rowcol(view.sel()[0].end())[0]
 
         if str(row + 1) in ERRORS[file_hash]:
             this_error = ERRORS[file_hash][str(row + 1)][0]
 
             string = ''
             if ERRORS_SHOW_COUNT:
-                string += "ERRORS : {count} | ".format(count = len(ERRORS[file_hash][str(row + 1)]))
+                string += "ERRORS : {count} | ".format(
+                    count=len(ERRORS[file_hash][str(row + 1)]))
 
             if ERRORS_SHOW_FIRST:
                 string += get_error_string(this_error)
@@ -108,7 +113,9 @@ class JslintifyEventListener(sublime_plugin.EventListener):#pylint: disable-msg=
         elif view.get_status("JSHint"):
             view.erase_status("JSHint")
 
+
 class JshintifyThread(threading.Thread):
+
     """ docstring for JshintifyThread """
 
     jshint_path = None
@@ -120,31 +127,35 @@ class JshintifyThread(threading.Thread):
         self.view = view
         self.errors = errors
         self.settings = settings
-        
+
         self.js_file_name = check_file(view) or None
 
         if self.js_file_name is not None:
-            self.js_file_hash = md5(self.js_file_name).hexdigest()
+            self.js_file_hash = md5(
+                self.js_file_name.encode('utf-8')).hexdigest()
         else:
             return None
 
         platform = sublime.platform()
 
         self.node_path = self.settings.get('paths')[platform]['node_path']
-        self.jshint_path = self.settings.get("paths")[platform]['jshint_path'] or 'jshint'
+        self.jshint_path = self.settings.get(
+            "paths")[platform]['jshint_path'] or 'jshint'
 
         self.jshintrc = self.settings.get("jshintrc", None)
 
         if self.js_file_hash in self.errors:
             for line in self.errors[self.js_file_hash]:
                 self.view.erase_regions('jshintify.error.' + str(line))
+
     def run(self):
         """
         Run jshint
         """
 
         if DEBUG:
-            print("PATHS: ", self.js_file_name, self.jshint_path, self.node_path)
+            print("PATHS: ", self.js_file_name,
+                  self.jshint_path, self.node_path)
 
         if None in [self.js_file_name, self.jshint_path]:
             return None
@@ -155,33 +166,30 @@ class JshintifyThread(threading.Thread):
             print("COMMAND: ", command)
 
         proc = subprocess.Popen(command,
-                            stdout=subprocess.PIPE,
-                            stderr=subprocess.PIPE,
-                            startupinfo=STARTUPINFO)
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE,
+                                startupinfo=STARTUPINFO)
 
         (out, err) = proc.communicate()
-        
+
         if type(err) == bytes and len(err) > 0:
             if DEBUG:
                 print("ERROR FROM JSHINT: ", err)
 
             raise Error(err)
 
-        new_errors = json.loads(out)
+        new_errors = json.loads(out.decode())
 
         if DEBUG:
             print("ERRORS COUNT:", len(new_errors))
 
         # for line in new_errors:
         sublime.set_timeout(lambda: self.draw_lines(new_errors), 100)
-        
+
         if self.js_file_hash not in self.errors:
             self.errors[self.js_file_hash] = {}
-        
-        if len(new_errors) == 0:
-            self.errors[self.js_file_hash] = {}
-        else:
-            self.errors[self.js_file_hash].update(new_errors)
+
+        self.errors[self.js_file_hash] = new_errors
 
     def create_command(self):
         """
@@ -197,7 +205,8 @@ class JshintifyThread(threading.Thread):
 
         command.append("--reporter")
 
-        reporter_path = os.path.join(sublime.packages_path(), 'jshintify', 'json-reporter.js')
+        reporter_path = os.path.join(
+            sublime.packages_path(), 'jshintify', 'json-reporter.js')
 
         command.append(reporter_path)
 
@@ -221,9 +230,11 @@ class JshintifyThread(threading.Thread):
             if not SHOW_OUTLINE:
                 draw_type = sublime.HIDDEN
 
-            line = self.view.line(self.view.text_point(int(line_number) - 1, 0))
+            line = self.view.line(
+                self.view.text_point(int(line_number) - 1, 0))
             self.view.add_regions('jshintify.error.' + str(line_number), [line],
-                            'jshintify.error.' + str(line_number), dot_sign, draw_type)
+                                  'jshintify.error.' + str(line_number), dot_sign, draw_type)
+
 
 def check_file(view):
     """
@@ -243,21 +254,23 @@ def check_file(view):
 
     return js_file_name
 
-class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):#pylint: disable-msg=R0903,W0232
+
+class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):  # pylint: disable-msg=R0903,W0232
+
     """Command to clear the sniffer marks from the view"""
     description = 'Clear sniffer marks...'
 
-    def run(self, edit):#pylint: disable-msg=R0903,W0232,W0613
+    def run(self, edit):  # pylint: disable-msg=R0903,W0232,W0613
         """
         Run plugin
         """
         row = self.view.rowcol(self.view.sel()[0].begin())[0]
-        
+
         file_name = check_file(self.view)
         if file_name is None:
             return
 
-        file_hash = md5(file_name).hexdigest()
+        file_hash = md5(file_name.encode('utf-8')).hexdigest()
 
         if file_hash not in ERRORS:
             return
@@ -267,7 +280,9 @@ class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):#pylint: disable-ms
             for error in ERRORS[file_hash][str(row + 1)]:
                 error_data.append(get_error_string(error))
 
-            self.view.window().show_quick_panel(error_data, None, sublime.MONOSPACE_FONT)
+            self.view.window().show_quick_panel(
+                error_data, None, sublime.MONOSPACE_FONT)
+
 
 def progress_tracker(thread, i=0):
     """ Show some stuff """
@@ -280,14 +295,17 @@ def progress_tracker(thread, i=0):
     else:
         sublime.status_message("")
 
+
 def get_error_string(error):
     """
     Return Error string
     """
 
-    return "{id} : {reason}".format(id = error['id'], reason = error['reason'])
+    return "{id} : {reason}".format(id=error['id'], reason=error['reason'])
+
 
 class Error(Exception):
+
     """
     Just generic error for module
     """
