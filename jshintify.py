@@ -18,74 +18,72 @@ if os.name == "nt":
 else:
     STARTUPINFO = None
 
-SETTINGS = sublime.load_settings('Jshintify.sublime-settings')
-
-RUN_ON_LOAD = SETTINGS.get('run_on_load', False)
-RUN_ON_SAVE = SETTINGS.get('run_on_save', False)
-
-ERRORS_SHOW_COUNT = SETTINGS.get('error_messages_show_count', False)
-ERRORS_SHOW_FIRST = SETTINGS.get('error_messages_show_first', False)
-
-EXTENSIONS = SETTINGS.get('extensions', [])
-
-SHOW_DOT = SETTINGS.get('show_dot', False)
-SHOW_OUTLINE = SETTINGS.get('show_outline', False)
-
-DEBUG = SETTINGS.get('debug', False)
-
 # for now let's cache those errors
 ERRORS = {}
 
 
-class Jshintify(sublime_plugin.TextCommand):  # pylint: disable-msg=R0903,W0232
+class Jshintify(sublime_plugin.TextCommand):  # pylint: disable=R0903,W0232
 
     '''
     Run jshint from sublime with configured shortcut
     '''
 
-    def run(self, edit):  # pylint: disable-msg=R0903,W0232,W0613
+    def run(self, edit):  # pylint: disable=R0903,W0232,W0613
         '''
         Sublime text runs this
 
         @param edit: sublime.Edit
         '''
-        thread = JshintifyThread(self.view, ERRORS, SETTINGS)
+
+        thread = JshintifyThread(
+            self.view,
+            ERRORS,
+            sublime.load_settings('Jshintify.sublime-settings')
+        )
+
         thread.start()
         progress_tracker(thread)
 
 
-class JslintifyEventListener(sublime_plugin.EventListener):  # pylint: disable-msg=R0903,W0232,W0613
+class JslintifyEventListener(sublime_plugin.EventListener):  # pylint: disable=R0903,W0232,W0613
 
     """
     Class for event listeners
     """
 
-    def on_post_save(self, view):  # pylint: disable-msg=R0201
+    def on_post_save(self, view):  # pylint: disable=R0201
         """
         Event triggered after file save
         """
-        if RUN_ON_SAVE:
-            thread = JshintifyThread(view, ERRORS, SETTINGS)
+        settings = sublime.load_settings('Jshintify.sublime-settings')
+
+        if settings.get('run_on_save', False):
+            thread = JshintifyThread(view, ERRORS, settings)
             thread.start()
             progress_tracker(thread)
 
-        if DEBUG:
-            print("RUN ON SAVE: ", RUN_ON_SAVE)
+        if settings.get('debug', False):
+            print("RUN ON SAVE: ", settings.get('run_on_save', False))
 
-    def on_load(self, view):  # pylint: disable-msg=R0201
+    def on_load(self, view):  # pylint: disable=R0201
         """
         Event triggered after file open
         """
-        if RUN_ON_LOAD:
-            thread = JshintifyThread(view, ERRORS, SETTINGS)
+        settings = sublime.load_settings('Jshintify.sublime-settings')
+
+        if settings.get('run_on_load', False):
+            thread = JshintifyThread(view, ERRORS, settings)
             thread.start()
             progress_tracker(thread)
 
-        if DEBUG:
-            print("RUN ON SAVE: ", RUN_ON_LOAD)
+        if settings.get('debug', False):
+            print("RUN ON SAVE: ", settings.get('run_on_load', False))
 
-    def on_selection_modified(self, view):  # pylint: disable-msg=R0201
+    def on_selection_modified(self, view):  # pylint: disable=R0201
         """ Event triggered during moving in editor """
+
+        settings = sublime.load_settings('Jshintify.sublime-settings')
+
         file_name = check_file(view)
 
         if file_name is None:
@@ -101,11 +99,11 @@ class JslintifyEventListener(sublime_plugin.EventListener):  # pylint: disable-m
             this_error = ERRORS[file_hash][str(row + 1)][0]
 
             string = ''
-            if ERRORS_SHOW_COUNT:
+            if settings.get('error_messages_show_count', False):
                 string += "ERRORS : {count} | ".format(
                     count=len(ERRORS[file_hash][str(row + 1)]))
 
-            if ERRORS_SHOW_FIRST:
+            if settings.get('error_messages_show_first', False):
                 string += get_error_string(this_error)
 
             view.set_status("JSHint", string)
@@ -153,7 +151,7 @@ class JshintifyThread(threading.Thread):
         Run jshint
         """
 
-        if DEBUG:
+        if self.settings.get('debug', False):
             print("PATHS: ", self.js_file_name,
                   self.jshint_path, self.node_path)
 
@@ -162,7 +160,7 @@ class JshintifyThread(threading.Thread):
 
         command = self.create_command()
 
-        if DEBUG:
+        if self.settings.get('debug', False):
             print("COMMAND: ", command)
 
         proc = subprocess.Popen(command,
@@ -173,14 +171,14 @@ class JshintifyThread(threading.Thread):
         (out, err) = proc.communicate()
 
         if type(err) == bytes and len(err) > 0:
-            if DEBUG:
+            if self.settings.get('debug', False):
                 print("ERROR FROM JSHINT: ", err)
 
             raise Error(err)
 
         new_errors = json.loads(out.decode())
 
-        if DEBUG:
+        if self.settings.get('debug', False):
             print("ERRORS COUNT:", len(new_errors))
 
         # for line in new_errors:
@@ -223,11 +221,11 @@ class JshintifyThread(threading.Thread):
 
         for line_number in errors:
             dot_sign = ''
-            if SHOW_DOT:
+            if self.settings.get('show_dot', False):
                 dot_sign = 'dot'
 
             draw_type = sublime.DRAW_OUTLINED
-            if not SHOW_OUTLINE:
+            if not self.settings.get('show_outline', False):
                 draw_type = sublime.HIDDEN
 
             line = self.view.line(
@@ -241,26 +239,29 @@ def check_file(view):
     Get current filename
     """
 
+    settings = sublime.load_settings('Jshintify.sublime-settings')
+    extensions = settings.get('extensions', [])  # pylint: disable=W0612,W0612
+
     js_file_name = ""
     if view.file_name() is not None:
         js_file_name = view.file_name()
     elif view.window() is not None and view.window().active_view().file_name() is not None:
         js_file_name = view.window().active_view().file_name()
-    elif DEBUG:
+    elif settings.get('debug', False):
         raise Error("This may be a bug, please create issue on github")
 
-    if os.path.splitext(js_file_name)[1] not in EXTENSIONS:
+    if os.path.splitext(js_file_name)[1] not in extensions:
         return None
 
     return js_file_name
 
 
-class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):  # pylint: disable-msg=R0903,W0232
+class JshintifyQuickPanelCommand(sublime_plugin.TextCommand):  # pylint: disable=R0903,W0232
 
     """Command to clear the sniffer marks from the view"""
     description = 'Clear sniffer marks...'
 
-    def run(self, edit):  # pylint: disable-msg=R0903,W0232,W0613
+    def run(self, edit):  # pylint: disable=R0903,W0232,W0613
         """
         Run plugin
         """
