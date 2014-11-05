@@ -51,39 +51,35 @@ class JslintifyEventListener(sublime_plugin.EventListener):  # pylint: disable=R
     Class for event listeners
     """
 
+    def __init__(self):
+        self.settings = sublime.load_settings('Jshintify.sublime-settings')
+
     def on_post_save(self, view):  # pylint: disable=R0201
         """
         Event triggered after file save
         """
-        settings = sublime.load_settings('Jshintify.sublime-settings')
-
-        if settings.get('run_on_save', False):
-            thread = JshintifyThread(view, ERRORS, settings)
+        if self.settings.get('run_on_save', False):
+            thread = JshintifyThread(view, ERRORS, self.settings)
             thread.start()
             progress_tracker(thread)
 
-        if settings.get('debug', False):
-            print("RUN ON SAVE: ", settings.get('run_on_save', False))
+        if self.settings.get('debug', False):
+            print("RUN ON SAVE: ", self.settings.get('run_on_save', False))
 
     def on_load(self, view):  # pylint: disable=R0201
         """
         Event triggered after file open
         """
-        settings = sublime.load_settings('Jshintify.sublime-settings')
-
-        if settings.get('run_on_load', False):
-            thread = JshintifyThread(view, ERRORS, settings)
+        if self.settings.get('run_on_load', False):
+            thread = JshintifyThread(view, ERRORS, self.settings)
             thread.start()
             progress_tracker(thread)
 
-        if settings.get('debug', False):
-            print("RUN ON SAVE: ", settings.get('run_on_load', False))
+        if self.settings.get('debug', False):
+            print("RUN ON SAVE: ", self.settings.get('run_on_load', False))
 
     def on_selection_modified(self, view):  # pylint: disable=R0201
         """ Event triggered during moving in editor """
-
-        settings = sublime.load_settings('Jshintify.sublime-settings')
-
         file_name = check_file(view)
 
         if file_name is None:
@@ -99,11 +95,11 @@ class JslintifyEventListener(sublime_plugin.EventListener):  # pylint: disable=R
             this_error = ERRORS[file_hash][str(row + 1)][0]
 
             string = ''
-            if settings.get('error_messages_show_count', False):
+            if self.settings.get('error_messages_show_count', False):
                 string += "ERRORS : {count} | ".format(
                     count=len(ERRORS[file_hash][str(row + 1)]))
 
-            if settings.get('error_messages_show_first', False):
+            if self.settings.get('error_messages_show_first', False):
                 string += get_error_string(this_error)
 
             view.set_status("JSHint", string)
