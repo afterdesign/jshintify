@@ -121,6 +121,7 @@ class JshintifyThread(threading.Thread):
         self.view = view
         self.errors = errors
         self.settings = settings
+        self.is_debug = self.settings.get('debug', False)
 
         self.js_file_name = check_file(view) or None
 
@@ -147,7 +148,7 @@ class JshintifyThread(threading.Thread):
         Run jshint
         """
 
-        if self.settings.get('debug', False):
+        if self.is_debug:
             print("PATHS: ", self.js_file_name,
                   self.jshint_path, self.node_path)
 
@@ -156,7 +157,7 @@ class JshintifyThread(threading.Thread):
 
         command = self.create_command()
 
-        if self.settings.get('debug', False):
+        if self.is_debug:
             print("COMMAND: ", command)
 
         proc = subprocess.Popen(command,
@@ -167,14 +168,14 @@ class JshintifyThread(threading.Thread):
         (out, err) = proc.communicate()
 
         if type(err) == bytes and len(err) > 0:
-            if self.settings.get('debug', False):
+            if self.is_debug:
                 print("ERROR FROM JSHINT: ", err)
 
             raise Error(err)
 
         new_errors = json.loads(out.decode())
 
-        if self.settings.get('debug', False):
+        if self.is_debug:
             print("ERRORS COUNT:", len(new_errors))
 
         # for line in new_errors:
