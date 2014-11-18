@@ -3,7 +3,7 @@ If You like this project - hit it with a star or something ツ
 
 ---
 
-Go to http://malinowski.be/jshintify and read about what you need to get this plugin get working.
+Go to http://afterdesign.github.io/jshintify and read about what you need to get this plugin get working.
 This plugin needs nodejs !
 I'll update README when this package will be available through Package Control.
 
